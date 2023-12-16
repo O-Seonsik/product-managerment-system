@@ -4,10 +4,12 @@ import { ProductController } from './product.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entity/product.entity';
 import { TOUR_DB } from '../database/database.constants';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Product], TOUR_DB)],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, JwtService],
+  exports: [ProductService],
 })
 export class ProductModule {}

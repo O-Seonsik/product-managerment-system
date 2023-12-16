@@ -1,4 +1,5 @@
-import { IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { DayOff } from '../entity/product.entity';
 
 export class CreateProductDto {
   @IsString()
@@ -6,4 +7,9 @@ export class CreateProductDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  @IsEnum(DayOff)
+  @IsOptional()
+  dayOff?: DayOff;
 }
