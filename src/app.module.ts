@@ -10,6 +10,8 @@ import { Seller } from './seller/entity/seller.entity';
 import { Contract } from './reservation/entity/contract.entity';
 import { User } from './user/entity/user.entity';
 import { ReservationToken } from './reservation/entity/reservation-token.entity';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { ReservationToken } from './reservation/entity/reservation-token.entity'
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
+    UserModule,
     ProductModule,
   ],
   controllers: [AppController],

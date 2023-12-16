@@ -12,6 +12,17 @@ export class User {
   @Column({ type: 'varchar', comment: '사용자 이름', length: 255 })
   name: string;
 
+  @Column({
+    type: 'varchar',
+    comment: '사용자 이메일',
+    length: 255,
+    unique: true,
+  })
+  email: string;
+
+  @Column({ type: 'varchar', comment: '사용자 비밀번호', length: 255 })
+  password: string;
+
   @OneToMany(() => ReservationToken, (token) => token.user)
   reservationTokenList: ReservationToken[];
 }
