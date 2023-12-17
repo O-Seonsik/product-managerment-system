@@ -23,6 +23,17 @@ export class UserService {
   }
 
   /**
+   * 인증용 password 포함 조회
+   * @param email
+   */
+  findUserWithPassword(email: string): Promise<User> {
+    return this.userRepository.findOne({
+      select: ['id', 'name', 'email', 'password'],
+      where: { email },
+    });
+  }
+
+  /**
    * 사용자 생성
    * @param createUserDto
    */

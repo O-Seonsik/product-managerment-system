@@ -6,9 +6,19 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as dayjs from 'dayjs';
-import { DayjsTransformer } from '../../database/transformer/dayjs.transformer';
+import { DayjsDatetimeTransformer } from '../../database/transformer/dayjsDatetimeTransformer';
 import { Seller } from '../../seller/entity/seller.entity';
 import { Contract } from '../../reservation/entity/contract.entity';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export enum DayOff {
   SUN,
@@ -18,6 +28,20 @@ export enum DayOff {
   THU,
   FRI,
   SAT,
+}
+
+export class Holiday {
+  @IsEnum(DayOff, { each: true })
+  @IsArray()
+  @IsOptional()
+  day?: DayOff[];
+
+  @IsNumber({}, { each: true })
+  @Min(1, { each: true })
+  @Max(31, { each: true })
+  @IsArray()
+  @IsOptional()
+  date?: number[];
 }
 
 @Entity()
@@ -44,16 +68,26 @@ export class Product {
     type: 'datetime',
     comment: '상품 등록 일시',
     default: () => 'CURRENT_TIMESTAMP',
-    transformer: DayjsTransformer,
+    transformer: DayjsDatetimeTransformer,
   })
   createdAt: dayjs.Dayjs;
 
-  /**
-   * TODO. 휴일인데 이거 스키마 고려해야할 것
-   *  날짜별, 요일별 두개 컬럼 별도로 사용해도 괜찮을 것으로 보임
-   *  현재는 휴일 테이블 별도로 만들고 하루씩 추가하도록 할 예정
-   *  추후 재정의 예정
-   */
-  @Column({ type: 'enum', enum: DayOff, nullable: true })
-  dayOff?: DayOff;
+  @Column({
+    type: 'date',
+    name: 'start_date',
+    comment: '상품 판매 시작일',
+    transformer: DayjsDatetimeTransformer,
+  })
+  startDate: dayjs.Dayjs;
+
+  @Column({
+    type: 'date',
+    name: 'end_date',
+    comment: '상품 판매 종료일',
+    transformer: DayjsDatetimeTransformer,
+  })
+  endDate: dayjs.Dayjs;
+
+  @Column({ type: 'json', name: 'holiday', nullable: true })
+  holiday?: Holiday;
 }

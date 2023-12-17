@@ -19,7 +19,20 @@ export class SellerService {
   ) {}
 
   findSeller(email: string): Promise<Seller> {
-    return this.sellerRepository.findOne({ where: { email } });
+    return this.sellerRepository.findOne({
+      where: { email },
+    });
+  }
+
+  /**
+   * 인증용 password 포함 조회
+   * @param email
+   */
+  findSellerWithPassword(email: string): Promise<Seller> {
+    return this.sellerRepository.findOne({
+      select: ['id', 'name', 'email', 'password'],
+      where: { email },
+    });
   }
 
   /**

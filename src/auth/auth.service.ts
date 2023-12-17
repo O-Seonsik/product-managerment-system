@@ -21,7 +21,7 @@ export class AuthService {
    * @param password
    */
   async signInUser(email: string, password: string) {
-    const user = await this.userService.findUser(email);
+    const user = await this.userService.findUserWithPassword(email);
     if (!user) {
       throw new NotFoundException('email 혹은 password 를 확인하세요');
     }
@@ -47,7 +47,7 @@ export class AuthService {
    * @param password
    */
   async signInSeller(email: string, password: string) {
-    const seller = await this.sellerService.findSeller(email);
+    const seller = await this.sellerService.findSellerWithPassword(email);
     if (!seller) {
       throw new NotFoundException('email 혹은 password 를 확인하세요');
     }

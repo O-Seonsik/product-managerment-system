@@ -15,10 +15,4 @@ export class ReservationToken {
 
   @OneToOne(() => Contract, (contract) => contract.reservationToken)
   contract: Contract;
-
-  @Column({
-    type: 'boolean',
-    comment: '토큰 만료 여부',
-  })
-  isExpired: boolean;
 }

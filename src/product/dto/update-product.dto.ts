@@ -1,5 +1,6 @@
 import {
   IsDateString,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -7,18 +8,25 @@ import {
 import { Holiday } from '../entity/product.entity';
 import { Type } from 'class-transformer';
 
-export class CreateProductDto {
+export class UpdateProductDto {
+  @IsNumber()
+  productId: number;
+
+  @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
+  @IsOptional()
   @IsDateString()
-  startDate: string;
+  startDate?: string;
 
+  @IsOptional()
   @IsDateString()
-  endDate: string;
+  endDate?: string;
 
   @IsOptional()
   @ValidateNested()

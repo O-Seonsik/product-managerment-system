@@ -20,7 +20,12 @@ export class Seller {
   })
   email: string;
 
-  @Column({ type: 'varchar', comment: '판매자 비밀번호', length: 255 })
+  @Column({
+    type: 'varchar',
+    comment: '판매자 비밀번호',
+    length: 255,
+    select: false,
+  })
   password: string;
 
   @OneToMany(() => Product, (product) => product.seller)

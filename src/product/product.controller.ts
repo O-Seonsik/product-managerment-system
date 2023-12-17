@@ -1,20 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { Product } from './entity/product.entity';
-import { CreateProductDto } from './dto/create-product.dto';
-import {
-  CurrentSeller,
-  SellerAuthGuard,
-} from '../auth/guard/seller-auth.guard';
-import { SellerModel } from '../seller/model/seller.model';
+import * as dayjs from 'dayjs';
 
 @Controller('product')
 export class ProductController {
@@ -22,12 +8,15 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   /**
-   *
-   * @param id
+   * 0 페이지부터 조회
+   * @param searchYearMonth
+   * @param page
    */
-  @Get('')
-  getProduct(@Param('id') id: number) {
-    this.logger.log(`id: ${id}`);
-    return this.productService.findOne(+id);
+  @Get('/:searchYearMonth/:page')
+  getProduct(
+    @Param('searchYearMonth') searchYearMonth: string,
+    @Param('page') page: number,
+  ) {
+    return this.productService.findMonthlyProduct(page, dayjs(searchYearMonth));
   }
 }
