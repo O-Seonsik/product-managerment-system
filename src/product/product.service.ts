@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { TOUR_DB } from '../database/database.constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
@@ -6,11 +6,14 @@ import { DayOff, Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import * as dayjs from 'dayjs';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductService {
   private logger = new Logger(this.constructor.name);
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectRepository(Product, TOUR_DB)
     private readonly productRepository: Repository<Product>,
   ) {}
@@ -37,6 +40,18 @@ export class ProductService {
    * @param searchDate
    */
   async findMonthlyProduct(page: number, searchDate: dayjs.Dayjs) {
+    const cachedData = await this.cacheManager.get(
+      `findMonthlyProduct(${page}, ${searchDate.format('YYYY-MM-DD')})`,
+    );
+    if (cachedData) {
+      this.logger.debug(
+        `cache hit: findMonthlyProduct(${page}, ${searchDate.format(
+          'YYYY-MM-DD',
+        )})`,
+      );
+
+      return cachedData;
+    }
     const startDate = searchDate.startOf('month');
     const endDate = searchDate.endOf('month');
     const productList = await this.productRepository.find({
@@ -50,7 +65,7 @@ export class ProductService {
     });
 
     // 휴일 필터
-    return this.getDateList(startDate, endDate).map(({ date, day }) => {
+    const result = this.getDateList(startDate, endDate).map(({ date, day }) => {
       const curDateProduct = productList.filter(
         ({ holiday }) =>
           !Boolean(holiday?.day.includes(day)) &&
@@ -62,6 +77,17 @@ export class ProductService {
         curDateProduct,
       };
     });
+
+    await this.cacheManager.set(
+      `findMonthlyProduct(${page}, ${searchDate.format('YYYY-MM-DD')})`,
+      result,
+    );
+    this.logger.debug(
+      `cache set: findMonthlyProduct(${page}, ${searchDate.format(
+        'YYYY-MM-DD',
+      )})`,
+    );
+    return result;
   }
 
   /**
@@ -111,6 +137,10 @@ export class ProductService {
     createProductDto: CreateProductDto,
   ): Promise<Product> {
     const { name, description, startDate, endDate, holiday } = createProductDto;
+
+    // 상품 등록시 캐시 초기화
+    await this.cacheManager.reset();
+
     return this.productRepository.save({
       seller: { id: sellerId },
       name,
@@ -137,6 +167,9 @@ export class ProductService {
     if (!product) {
       throw new NotFoundException('상품을 찾을 수 없습니다.');
     }
+
+    // 상품 수정시 캐시 초기화
+    await this.cacheManager.reset();
 
     return this.productRepository.save({
       id: productId,

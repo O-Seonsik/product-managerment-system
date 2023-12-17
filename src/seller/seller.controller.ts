@@ -109,7 +109,6 @@ export class SellerController {
     @CurrentSeller() seller: SellerModel,
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    console.log(seller);
     return this.productService.updateProduct(seller.id, updateProductDto);
   }
 
